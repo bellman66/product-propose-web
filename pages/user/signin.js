@@ -10,7 +10,7 @@ const layoutInfo = {
 }
 
 function SignIn() {
-    const { loggedIn, data } = useUserInfo()
+    const { loggedIn, info } = useUserInfo()
 
     // Already Login
     if (loggedIn) {
@@ -20,7 +20,7 @@ function SignIn() {
                     <div className="xl:px-20 md:px-10 sm:px-6 px-4 md:py-12 py-9 2xl:mx-auto 2xl:container md:flex items-center justify-center">
 
                         <p> 로그인 상태입니다. </p> 
-                        <p> User : {data.accountInfo.email} </p>
+                        <p> User : {info.email} </p>
                     </div>
                 </div>
             </>

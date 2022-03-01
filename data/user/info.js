@@ -10,7 +10,7 @@ export default function useUserInfo() {
     return {
       loading,
       loggedIn,
-      data,
+      info: loggedIn ? data.info : null,
       error
     };
   }
