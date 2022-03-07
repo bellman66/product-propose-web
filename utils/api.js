@@ -1,17 +1,18 @@
 import useSWR from "swr"
 import axios from "axios"
 import { getCookie } from 'cookies-next'
+import useSWRInfinite from "swr/infinite";
 
 // Api Url
 const LIVE_API_URL = 'http://'
 const TEST_API_URL = 'http://localhost:8080'
-const CURRENT_API_URL = TEST_API_URL 
+const CURRENT_API_URL = TEST_API_URL
 
 // Default Fetcher
-const getFetcher = (headers) => 
+const getFetcher = (headers) =>
                    (url) => axios.get(url, headers)
                                  .then(res => {if (res.status === 200 && res.data !== undefined) {return res.data}})
-const postFetcher = (body, headers) => 
+const postFetcher = (body, headers) =>
                     (url) => axios.post(url, body, headers)
                                   .then(res => {if (res.status === 200 && res.data !== undefined) {return res.data}})
 
@@ -29,4 +30,10 @@ export function useApiUserInfoByToken() {
         }
     }
     return useSWR("/account/info", getFetcher(headerVal));
+}
+
+export function useApiWikiSimpleData(pageSize) {
+    return useSWRInfinite(
+        (pageIndex) => `/wiki/read?page=${pageIndex}&size=${pageSize}` ,
+        getFetcher());
 }

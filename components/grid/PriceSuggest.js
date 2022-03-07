@@ -1,29 +1,52 @@
 import React,{useState} from "react";
 
-// Swr Infinite
-import useSWRInfinite from 'swr/infinite'
-
 // Components
 import PriceCard from "../card/PriceCard";
+import useWikiSimpleData from "/data/wiki/Info";
 
-const getKey = (pageIndex, previousPageData) => {
-    if (previousPageData && !previousPageData.length) return null // 끝에 도달
-    return `/read?page=${pageIndex}&size=30`                    // SWR 키
-}
+const PAGE_SIZE = 30
 
 function PriceSuggestGrid() {
 
-    const pagenation = useState({
-        "page": 0,
-        "size": 30
-    })
+    const { wikiGroup,
+        isLoadingMore,
+        isEmpty,
+        isReachingEnd,
+        size,
+        setSize} = useWikiSimpleData(PAGE_SIZE)
 
-    const { data, size, setSize } = useSWRInfinite(getKey, fetcher)
+    const MoreBtn = () => {
+        return (
+            <button
+                disabled={isLoadingMore || isReachingEnd}
+                hidden={isReachingEnd}
+                onClick={() => {setSize(size+1);}}>
 
+                {isLoadingMore ? "로딩중..." : "더 보기"}
+            </button>
+        )
+    }
+
+    if(isEmpty) {
+        return (
+            (<p> 현재 컨텐츠가 없습니다 </p>)
+        )
+    }
     return (
         <>
             <div className="w-full grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                현재 페이지 : { size }
+                <br/>
 
+                {wikiGroup.map((wiki) => {
+                    return (
+                        <div>
+                            <p> - {wiki.title} </p>
+                            <PriceCard/>
+                        </div>
+                    )
+                })}
+                <MoreBtn/>
             </div>
         </>
     )
