@@ -8,7 +8,8 @@ const PAGE_SIZE = 30
 
 function PriceSuggestGrid() {
 
-    const { wikiGroup,
+    const {
+        wikiGroup,
         isLoadingMore,
         isEmpty,
         isReachingEnd,
@@ -35,17 +36,15 @@ function PriceSuggestGrid() {
     return (
         <>
             <div className="w-full grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                현재 페이지 : { size }
-                <br/>
-
-                {wikiGroup.map((wiki) => {
-                    return (
-                        <div>
-                            <p> - {wiki.title} </p>
-                            <PriceCard/>
-                        </div>
-                    )
-                })}
+                {
+                    wikiGroup.map((wiki) => {
+                        return (
+                            <div>
+                                <PriceCard wiki={wiki}/>
+                            </div>
+                        )
+                    })
+                }
                 <MoreBtn/>
             </div>
         </>
