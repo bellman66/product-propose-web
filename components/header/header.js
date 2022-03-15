@@ -11,17 +11,7 @@ function Header() {
     const { loggedIn } = useUserInfo()
 
     // SignUp , Login button
-    // 로그인시 버튼 비활성화
     const SignButton = () => {
-        if (loggedIn) {
-            return (
-                <>
-                    <div className="w-12 h-12 bg-cover rounded-md -ml-2">
-                        <img src="https://tuk-cdn.s3.amazonaws.com/assets/components/avatars/a_4_4.png" alt className="h-full w-full overflow-hidden object-cover object-center rounded-full border-2 border-white dark:border-gray-700 shadow" />
-                    </div>
-                </>
-            )
-        }
         return (
             <>
                 <Link href="/user/signup">
@@ -35,6 +25,20 @@ function Header() {
         )
     }
 
+    const Profile_WikiRegister = () => {
+        return (
+            <>
+                <Link href="/wiki/register">
+                    <button className="mx-2 my-2 bg-indigo-700 transition duration-150 ease-in-out hover:bg-indigo-600 rounded text-white px-8 py-3 text-sm"> 물건 등록! </button>
+                </Link>
+
+                <div className="w-16 bg-cover rounded-md -ml-2">
+                    <img src="https://tuk-cdn.s3.amazonaws.com/assets/components/avatars/a_4_4.png" alt className="h-full w-full overflow-hidden object-cover object-center rounded-full border-2 border-white dark:border-gray-700 shadow" />
+                </div>
+            </>
+        )
+    }
+
     return (
         <>
             <div className=" bg-white ">
@@ -42,17 +46,20 @@ function Header() {
                     {/* For large and Medium-sized Screen */}
                     <div className="flex justify-between ">
                         <div className=" flex space-x-3 items-center">
-                            <Image src="/image/wikiPriceRabbit.png" 
-                            width={34} 
-                            height={34} 
-                            viewBox="0 0 34 34" 
+                            <Image src="/image/wikiPriceRabbit.png"
+                            width={34}
+                            height={34}
+                            viewBox="0 0 34 34"
                             fill="none"/>
 
-                            <h1 className=" font-normal text-2xl leading-6 text-gray-800"> Wiki Price ! </h1>
+                            <h1 className=" font-normal text-2xl leading-6 text-gray-800"> Price Tracker </h1>
                         </div>
 
                         <div className="hidden sm:flex flex-row space-x-4">
-                            <SignButton/>
+                            { loggedIn ?
+                                <Profile_WikiRegister/> :
+                                <SignButton/>
+                            }
                         </div>
 
                         {/* Burger Icon */}
