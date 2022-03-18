@@ -72,14 +72,17 @@ const Register = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
 
+        // Set PriceRecord - SaleWay
         setPriceRecordCreateForm(origin => ({
             ...origin,
             ["saleWay"] : saleWay
         }))
 
         const header = {
-            "Content-type": "application/json",
-            "Authorization": `Bearer ${getCookie("accessToken")}`,
+            headers: {
+                "Content-type": "application/json",
+                "Authorization": `Bearer ${getCookie("accessToken")}`,
+            }
         }
 
         const body = {

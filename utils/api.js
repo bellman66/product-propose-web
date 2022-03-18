@@ -45,19 +45,13 @@ export function useApiWikiSimpleData(pageSize) {
 
 export async function callRegisterWiki(body, header) {
     await axios
-        .post(getApiUrl(`/wiki/register`), body, header)
+        .post(getApiUrl("/wiki/register"), body, header)
         .then(
             res => {
                 if (res.status === 200 && res.data !== undefined) {
-                    console.log(res.data)
                     return res.data
                 }
             }
         )
-        .catch(
-            err => {
-                console.log(err)
-                alert("error occur")
-            }
-        )
+        .catch(err => alert("위키 등록에 실패하였습니다."))
 }
