@@ -1,10 +1,12 @@
 import useSWR from "swr"
 import axios from "axios"
 import { getCookie } from 'cookies-next'
-import useSWRInfinite from "swr/infinite";
+import useSWRInfinite from "swr/infinite"
+import {cloneDeep} from "lodash";
 
 // Api Version
 const VERSION = "/v1"
+const getApiUrl = (url) => { return VERSION + url; }
 
 // Default Fetcher
 const getFetcher = (headers) =>
@@ -14,7 +16,38 @@ const postFetcher = (body, headers) =>
                     (url) => axios.post(url, body, headers)
                                   .then(res => {if (res.status === 200 && res.data !== undefined) {return res.data}})
 
-const getApiUrl = (url) => { return VERSION + url; }
+// Get Data
+const getContentData = (response) => {
+    if (response.status !== 200 || response.data === undefined)
+        throw new Error("Not Found Data")
+
+    return response.data
+}
+
+// Insert Auth - accessToken
+const insertAccessToken = (header) => {
+    let copy = cloneDeep(header)
+    copy.headers["Authorization"] = `Bearer ${getCookie("accessToken")}`;
+    return copy;
+}
+
+// Get Default Header
+const DEFAULT_JSON_HEADER = {
+    headers: {
+        "Content-type": "application/json"
+    }
+}
+
+const DEFAULT_MULTIPART_HEADER = {
+    headers: {
+        "Content-type": 'application/x-www-form-urlencoded'
+    }
+}
+
+// Get Default Alert
+const getErrorAlertDefault = (msg = "진행에 실패했습니다.") => {
+    return () => alert(msg)
+}
 
 // SWR =================================================================================================================
 
@@ -25,12 +58,7 @@ export default function useApiServerCheck() {
 }
 
 export function useApiUserInfoByToken() {
-    const headerVal = {
-        headers: {
-            "Content-type": "application/json",
-            "Authorization": `Bearer ${getCookie("accessToken")}`,
-        }
-    }
+    const headerVal = insertAccessToken(DEFAULT_JSON_HEADER)
     return useSWR(getApiUrl(`/account/info`), getFetcher(headerVal));
 }
 
@@ -41,17 +69,48 @@ export function useApiWikiSimpleData(pageSize) {
             getFetcher());
 }
 
-// Normal ==============================================================================================================
+// Business ==============================================================================================================
 
-export async function callRegisterWiki(body, header) {
-    await axios
+export async function createRegisterWiki(wikiBody, imageBody) {
+    const multipartAuthHeader = insertAccessToken(DEFAULT_MULTIPART_HEADER)
+
+    try {
+        // Process Register Wiki
+        const data = await callRegisterWiki(wikiBody)
+
+        // Process Upload Image
+        const wikiId = data.result
+        callUploadImage(wikiId, imageBody)
+    } catch (ignore) {}
+}
+
+// Call ==============================================================================================================
+
+async function callRegisterWiki(body,
+                                header = insertAccessToken(DEFAULT_JSON_HEADER),
+                                error = getErrorAlertDefault("물픔 등록에 실패했습니다.")) {
+    return await axios
         .post(getApiUrl("/wiki/register"), body, header)
-        .then(
-            res => {
-                if (res.status === 200 && res.data !== undefined) {
-                    return res.data
-                }
+        .then(getContentData)
+        .catch(error)
+}
+
+async function callUploadImage(wikiId, body,
+                               header = insertAccessToken(DEFAULT_MULTIPART_HEADER),
+                               error = getErrorAlertDefault("이미지 등록에 실패했습니다.")) {
+   // await axios
+   //     .post(getApiUrl("/wiki/" + wikiId + "/update/image"), body, header)
+   //     .then(getContentData)
+   //     .catch(error)
+
+    await axios({
+            method: 'post',
+            url: getApiUrl("/wiki/" + wikiId + "/update/image"),
+            data : body,
+            headers: {
+                "Content-type": 'multipart/form-data'
             }
-        )
-        .catch(err => alert("위키 등록에 실패하였습니다."))
+        })
+        .then(getContentData)
+        .catch(error)
 }

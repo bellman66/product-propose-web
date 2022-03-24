@@ -1,10 +1,12 @@
 import React, {useState} from "react";
 import {handleStateById} from "/utils/common";
 import {PlusCircleIcon, MinusCircleIcon} from "@heroicons/react/solid";
-import {callRegisterWiki} from "/utils/api";
-import {getCookie} from "cookies-next";
+import {createRegisterWiki} from "/utils/api";
+import {useRouter} from "next/router";
 
 const Register = () => {
+
+    const router = useRouter()
 
     /*  Example
         "wikiCreateForm": {
@@ -35,6 +37,32 @@ const Register = () => {
 
     // tagGroup
     const [tagGroup, setTagGroup] = useState([]);
+
+    // Image
+    const [images, setImages] = useState([])
+    // 미리보기 이미지
+    const [previewImages, setPreviewImages] = useState([])
+
+    const handleUploadImage = (e) => {
+        e.preventDefault();
+        const files = Array.from(e.target.files);
+
+        // Set Preview Images
+        files.forEach((file) => {
+            addPreviewImage(file);
+        })
+
+        // Set Images
+        setImages((origin) => [...origin, ...files]);
+    };
+
+    const addPreviewImage = (file) => {
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function () {
+            setPreviewImages((origin) => [...origin, reader.result])
+        }
+    }
 
     const handleAddSaleWay = (e) => {
         e.preventDefault();
@@ -78,14 +106,7 @@ const Register = () => {
             ["saleWay"] : saleWay
         }))
 
-        const header = {
-            headers: {
-                "Content-type": "application/json",
-                "Authorization": `Bearer ${getCookie("accessToken")}`,
-            }
-        }
-
-        const body = {
+        const wikiData = {
             "wikiCreateData" : {
                 "wikiCreateForm" : wikiCreateForm,
                 "priceRecordCreateForm" : priceRecordCreateForm,
@@ -93,17 +114,21 @@ const Register = () => {
             }
         }
 
-        callRegisterWiki(body,header);
+        // Create Form Data
+        const imageData = new FormData();
+        images.forEach(image => imageData.append("images", image))
+
+        createRegisterWiki(wikiData, imageData)
     };
 
     return (
 
         <div id="register">
-            <label>Output:</label>
-            <pre>{JSON.stringify(wikiCreateForm, null, 2)}</pre>
-            <pre>{JSON.stringify(priceRecordCreateForm, null, 2)}</pre>
-            <pre>{JSON.stringify(saleWay, null, 2)}</pre>
-            <pre>{JSON.stringify(tagGroup, null, 2)}</pre>
+            {/*<label>Output:</label>*/}
+            {/*<pre>{JSON.stringify(wikiCreateForm, null, 2)}</pre>*/}
+            {/*<pre>{JSON.stringify(priceRecordCreateForm, null, 2)}</pre>*/}
+            {/*<pre>{JSON.stringify(saleWay, null, 2)}</pre>*/}
+            {/*<pre>{JSON.stringify(tagGroup, null, 2)}</pre>*/}
 
             <div className="bg-white dark:bg-gray-800">
                 <div className="container mx-auto bg-white dark:bg-gray-800 rounded">
@@ -115,28 +140,57 @@ const Register = () => {
                                     <path className="heroicon-ui" d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm0-9a1 1 0 0 1 1 1v4a1 1 0 0 1-2 0v-4a1 1 0 0 1 1-1zm0-4a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="currentColor" />
                                 </svg>
                             </div>
+                            <div className="items-center bg-grey-lighter px-4 py-4">
+                                <label
+                                    className="flex flex-row items-center px-3 py-1 bg-white text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:text-white">
+                                    <svg className="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 20 20">
+                                        <path
+                                            d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z"/>
+                                    </svg>
+                                    <span className="pl-2 text-base leading-normal">사진 업로드</span>
+                                    <input type='file' multiple className="hidden" onChange={handleUploadImage}/>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
                     <div className="mx-auto">
                         <div className="xl:w-9/12 w-11/12 mx-auto xl:mx-0">
-                            <div className="rounded relative mt-8 h-48">
-                                <div className="w-20 h-20 rounded-full bg-cover bg-center bg-no-repeat absolute bottom-0 -mb-10 ml-12 shadow flex items-center justify-center">
-                                    <img src="https://cdn.tuk.dev/assets/webapp/forms/form_layouts/form2.jpg" alt className="absolute z-0 h-full w-full object-cover rounded-full shadow top-0 left-0 bottom-0 right-0" />
-                                    <div className="absolute bg-black opacity-50 top-0 right-0 bottom-0 left-0 rounded-full z-0" />
-                                    <div className="cursor-pointer flex flex-col justify-center items-center z-10 text-gray-100">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-edit" width={20} height={20} viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                                            <path stroke="none" d="M0 0h24v24H0z" />
-                                            <path d="M9 7 h-3a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-3" />
-                                            <path d="M9 15h3l8.5 -8.5a1.5 1.5 0 0 0 -3 -3l-8.5 8.5v3" />
-                                            <line x1={16} y1={5} x2={19} y2={8} />
-                                        </svg>
-                                        <p className="text-xs text-gray-100">Edit Picture</p>
-                                    </div>
-                                </div>
+                            <div className="py-5">
+                                {   previewImages.length === 0 ?
+                                    (
+                                        <div id="empty-cover-art"
+                                             className="rounded sm:w-full md:w-48 md:h-48 py-16 text-center opacity-50 md:border-solid md:border-2 md:border-gray-400">
+                                            <svg className="mx-auto feather feather-image" xmlns="http://www.w3.org/2000/svg"
+                                                 width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                                <polyline points="21 15 16 10 5 21"></polyline>
+                                            </svg>
+                                            <div className="py-4">
+                                                Add Product Image
+                                            </div>
+                                        </div>
+                                    ) :
+                                    (
+                                        <div id="images-container" className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                            {
+                                                previewImages.map((value) => {
+                                                    return (
+                                                        <div className="h-64 mb-3 w-full p-3 rounded-lh bg-cover bg-center"
+                                                             style={{backgroundImage: 'url(' + value + ')'}}>
+                                                        </div>
+                                                    )
+                                                })
+                                            }
+                                        </div>
+                                    )
+                                }
                             </div>
 
-                            <div className="mt-16 flex flex-col xl:w-2/6 lg:w-1/2 md:w-1/2 w-full">
+                            <div className="mt-8 flex flex-col xl:w-2/6 lg:w-1/2 md:w-1/2 w-full">
                                 <label htmlFor="title" className="pb-2 text-sm font-bold text-gray-800 dark:text-gray-100">
                                     title
                                 </label>
