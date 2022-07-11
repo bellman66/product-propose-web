@@ -119,6 +119,8 @@ const Register = () => {
         images.forEach(image => imageData.append("images", image))
 
         createRegisterWiki(wikiData, imageData)
+            .then(router.push("/"))
+            .catch(err => console.log(err))
     };
 
     return (

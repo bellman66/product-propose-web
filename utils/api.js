@@ -74,14 +74,12 @@ export function useApiWikiSimpleData(pageSize) {
 export async function createRegisterWiki(wikiBody, imageBody) {
     const multipartAuthHeader = insertAccessToken(DEFAULT_MULTIPART_HEADER)
 
-    try {
-        // Process Register Wiki
-        const data = await callRegisterWiki(wikiBody)
+    // Process Register Wiki
+    const data = await callRegisterWiki(wikiBody)
 
-        // Process Upload Image
-        const wikiId = data.result
-        callUploadImage(wikiId, imageBody)
-    } catch (ignore) {}
+    // Process Upload Image
+    const wikiId = data.result
+    await callUploadImage(wikiId, imageBody)
 }
 
 // Call ==============================================================================================================
